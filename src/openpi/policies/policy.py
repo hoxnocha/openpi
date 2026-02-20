@@ -68,7 +68,33 @@ class Policy(BasePolicy):
     def infer(self, obs: dict, *, noise: np.ndarray | None = None) -> dict:  # type: ignore[misc]
         # Make a copy since transformations may modify the inputs in place.
         inputs = jax.tree.map(lambda x: x, obs)
+        #print(f"original inputs: {inputs}")
+        img = inputs["observation/image"]
+        #print(f"Key: 'observation/image'")
+        #print(f"  Shape: {img.shape}  (Expect: H,W,3)")
+        #print(f"  Range: [{img.min()}, {img.max()}] (Expect: 0-255)")
+        #print(f"  Dtype: {img.dtype}")
+        #print(f"state before transform: {inputs['observation/state']}")
+        #wrist_img = inputs["observation/wrist_image"]
+        #print(f"Key: 'observation/wrist_image'")
+        #print(f"  Shape: {wrist_img.shape}")
+        #print(f"  Range: [{wrist_img.min()}, {wrist_img.max()}] (Expect: 0-255)")
+        #print(f"  Dtype: {wrist_img.dtype}")
+        
         inputs = self._input_transform(inputs)
+        #print("---inputs after transformation:----")
+        #base_0_rgb = inputs["image"]["base_0_rgb"]
+        #print(f"Key: 'image' -> 'base_0_rgb'")
+        #print(f"  Shape: {base_0_rgb.shape}  (Expect: H,W,3)")
+        #print(f"  Range: [{base_0_rgb.min()}, {base_0_rgb.max()}] (Expect: 0-255)")
+        #print(f"  Dtype: {base_0_rgb.dtype}")
+        #left_wrist_0_rgb = inputs["image"]["left_wrist_0_rgb"]
+        #print(f"Key: 'image' -> 'left_wrist_0_rgb'")
+        #print(f"  Shape: {left_wrist_0_rgb.shape}  (Expect: H,W,3)")
+        #print(f"  Range: [{left_wrist_0_rgb.min()}, {left_wrist_0_rgb.max()}] (Expect: 0-255)")
+        #print(f"  Dtype: {left_wrist_0_rgb.dtype}")
+        #print(f"state after transform: {inputs['state']}")
+
         if not self._is_pytorch_model:
             # Make a batch and convert to jax.Array.
             inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
@@ -98,8 +124,11 @@ class Policy(BasePolicy):
             outputs = jax.tree.map(lambda x: np.asarray(x[0, ...].detach().cpu()), outputs)
         else:
             outputs = jax.tree.map(lambda x: np.asarray(x[0, ...]), outputs)
-
+        #print(f"orginal outputs", outputs)
+        
+        # ！！！！ very inportant
         outputs = self._output_transform(outputs)
+        #print(f"outputs after transformation", outputs)
         outputs["policy_timing"] = {
             "infer_ms": model_time * 1000,
         }

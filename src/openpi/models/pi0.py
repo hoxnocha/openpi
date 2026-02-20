@@ -13,6 +13,109 @@ import openpi.models.gemma as _gemma
 import openpi.models.siglip as _siglip
 from openpi.shared import array_typing as at
 
+### added for evaluate text embeddings
+import numpy as np
+import os
+import wandb
+import pickle
+
+#CURRENT_PROMPT_TEXT = "initial_prompt"
+#GLOBAL_WANDB_TABLE = None
+
+#wandb.init(
+#        project="pi0-embedding-analysis",
+#        id="collect_6_prompts_mean_pool",
+#        resume="allow",
+#    )
+
+#def wandb_log_callback(raw_tokens_np, mask_np):
+#    try:
+#        global CURRENT_PROMPT_TEXT
+#        global GLOBAL_WANDB_TABLE
+        
+        # Initialize table once if not exists
+#        if GLOBAL_WANDB_TABLE is None:
+#            GLOBAL_WANDB_TABLE = wandb.Table(columns=["Prompt", "Mean_Embedding"])
+
+#        seq_0 = raw_tokens_np[0] 
+#        mask_0 = mask_np[0]      
+#        valid_indices = (mask_0 > 0.5) 
+#        valid_tokens = seq_0[valid_indices]
+        
+#        mean_vector = np.mean(valid_tokens, axis=0)
+        
+        # Add ONLY the new data to the table
+#        GLOBAL_WANDB_TABLE.add_data(str(CURRENT_PROMPT_TEXT), mean_vector)
+        
+        # Log the table (WandB handles updates smartly if you use the same object reference, 
+        # or you can just log the new row if you change the visualization approach)
+#        wandb.log({
+#            "analysis/mean_pooled_dataset": GLOBAL_WANDB_TABLE,
+#            "prompt_id_step": wandb.run.step 
+#        })
+    
+            
+#    except Exception as e:
+#        print(f"Callback Error: {e}")
+        
+'''     
+def wandb_log_callback(raw_tokens_np, mask_np):
+    """
+    store the embeddings as table locally, and then 
+    """
+    try:
+        
+        global CURRENT_PROMPT_TEXT
+        
+        
+        seq_0 = raw_tokens_np[0] 
+        mask_0 = mask_np[0]      
+        valid_indices = (mask_0 > 0.5) 
+        valid_tokens = seq_0[valid_indices]
+    
+        # [Prompt, Token_Index, Vector]
+        #new_data_rows = []
+        #for idx, vec in enumerate(valid_tokens):
+        #    new_data_rows.append([
+        #        CURRENT_PROMPT_TEXT,
+        #        idx,
+        #        vec.tolist()
+        #    ])
+        
+        mean_vector = np.mean(valid_tokens, axis=0)
+        # [Prompt, Vector]
+        
+        new_entry = [str(CURRENT_PROMPT_TEXT), mean_vector]
+        
+        history_file = "mean_pooling_embedding.pkl"
+        all_data = []
+
+        if os.path.exists(history_file):
+            try:
+                with open(history_file, "rb") as f:
+                    all_data = pickle.load(f)
+                print(f"History data loaded")
+            except Exception as e:
+                print(f"No data found: {e}")
+
+        all_data.append(new_entry)
+
+        with open(history_file, "wb") as f:
+            pickle.dump(all_data, f)
+        
+        table = wandb.Table(columns=["Prompt", "Mean_Embedding"], data=all_data) 
+        wandb.log({
+                "analysis/mean_pooled_dataset": table,
+                "debug/history_count": len(all_data),
+                "prompt_id_step": wandb.run.step 
+        })
+        print(f" [WandB] has loaded {len(all_data)} data (current: {CURRENT_PROMPT_TEXT})")
+            
+    except Exception as e:
+        print(f"Callback Error: {e}")
+'''  
+###
+
 logger = logging.getLogger("openpi")
 
 
@@ -127,6 +230,12 @@ class Pi0(_model.BaseModel):
         # add language (aka tokenized inputs)
         if obs.tokenized_prompt is not None:
             tokenized_inputs = self.PaliGemma.llm(obs.tokenized_prompt, method="embed")
+            
+            # add for text embedding evaluation, give embedding to another function for processing and logging
+            #print(f"Traced Shape for text embedding: {tokenized_inputs.shape}")#(1, 48, 2048) (Batch, Sequence, Embedding)
+            #jax.debug.callback(wandb_log_callback, tokenized_inputs, obs.tokenized_prompt_mask) 
+            # modify end
+            
             tokens.append(tokenized_inputs)
             input_mask.append(obs.tokenized_prompt_mask)
             # full attention between image and language inputs

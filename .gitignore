@@ -1,9 +1,11 @@
 # Data directories.
-assets/
+
 checkpoints/
 data/
+dataset/
 wandb/
 
+examples/franka/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -683,7 +683,7 @@ _CONFIGS = [
     #
     TrainConfig(
         # Change the name to reflect your model and dataset.
-        name="pi0_pump_bottle",
+        name="pi0_erase_whiteboard_aligned_8d",
         # Here you define the model config -- In this example we use pi0 as the model
         # architecture and perform *full* finetuning. in the examples below we show how to modify
         # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.
@@ -693,7 +693,7 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="ty/pi0_pump_bottle",  # same as difined in data convert script
+            repo_id="ty/pi0_erase_whiteboard_aligned_8d",  # same as difined in data convert script
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
                 # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
@@ -703,18 +703,25 @@ _CONFIGS = [
             # default_prompt="pump the bottle",
             extra_delta_transform=True,
         ),
-        checkpoint_base_dir="/home/ty/.cache/openpi/openpi-assets/checkpoints",
+        checkpoint_base_dir="/home/ty/openpi/checkpoints",
         # Here you define which pre-trained checkpoint you want to load to initialize the model.
         # This should match the model config you chose above -- i.e. in this case we use the pi0 base model.
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
         # Below you can define other hyperparameters like the learning rate, number of training steps, etc.
         # Check the base TrainConfig class for a full list of available hyperparameters.
         num_train_steps=30_000,
+        batch_size=32,
+        freeze_filter=pi0_config.Pi0Config(
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"
+        ).get_freeze_filter(),
+        # Turn off EMA for LoRA finetuning.
+        ema_decay=None,
        
     ),
-    TrainConfig(
+
+        TrainConfig(
         # Change the name to reflect your model and dataset.
-        name="pi0_insert_plug_lora",
+        name="pi0_insert_USB_aligned_8d",
         # Here you define the model config -- In this example we use pi0 as the model
         # architecture and perform *full* finetuning. in the examples below we show how to modify
         # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.
@@ -724,7 +731,7 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="ty/pi0_insert_plug",  # same as difined in data convert script
+            repo_id="ty/pi0_insert_USB_aligned_8d",  # same as difined in data convert script
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
                 # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
@@ -733,7 +740,7 @@ _CONFIGS = [
             ),
             extra_delta_transform=True,
         ),
-        checkpoint_base_dir="/home/yansong/TacVLA/openpi/checkpoints",
+        checkpoint_base_dir="/home/ty/openpi/checkpoints",
         # Here you define which pre-trained checkpoint you want to load to initialize the model.
         # This should match the model config you chose above -- i.e. in this case we use the pi0 base model.
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
@@ -747,9 +754,83 @@ _CONFIGS = [
         # Turn off EMA for LoRA finetuning.
         ema_decay=None,
     ),
+
+
     TrainConfig(
         # Change the name to reflect your model and dataset.
-        name="pi0_pump_bottle_lora",
+        name="pi0_insert_plug_aligned_8d",
+        # Here you define the model config -- In this example we use pi0 as the model
+        # architecture and perform *full* finetuning. in the examples below we show how to modify
+        # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.
+        # model=pi0_config.Pi0Config(paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"),# example for fine-tuning from official repo
+        model=pi0_config.Pi0Config(paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"),
+        # Here you define the dataset you are training on. In this example we use the Libero
+        # dataset. For your own dataset, you can change the repo_id to point to your dataset.
+        # Also modify the DataConfig to use the new config you made for your dataset above.
+        data=FrankaDataConfig(
+            repo_id="ty/pi0_insert_plug_aligned_8d",  # same as difined in data convert script
+            base_config=DataConfig(
+                # This flag determines whether we load the prompt (i.e. the task instruction) from the
+                # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
+                # a field called ``prompt`` in the input dict. The recommended setting is True.
+                prompt_from_task=True,
+            ),
+            extra_delta_transform=True,
+        ),
+        checkpoint_base_dir="/home/ty/openpi/checkpoints",
+        # Here you define which pre-trained checkpoint you want to load to initialize the model.
+        # This should match the model config you chose above -- i.e. in this case we use the pi0 base model.
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        # Below you can define other hyperparameters like the learning rate, number of training steps, etc.
+        # Check the base TrainConfig class for a full list of available hyperparameters.
+        num_train_steps=30_000,
+        batch_size=32,
+        freeze_filter=pi0_config.Pi0Config(
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"
+        ).get_freeze_filter(),
+        # Turn off EMA for LoRA finetuning.
+        ema_decay=None,
+    ),
+
+    TrainConfig(
+        # Change the name to reflect your model and dataset.
+        name="pi0_erase_whiteboard_aligned",
+        # Here you define the model config -- In this example we use pi0 as the model
+        # architecture and perform *full* finetuning. in the examples below we show how to modify
+        # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.
+        # model=pi0_config.Pi0Config(paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"),# example for fine-tuning from official repo
+        model=pi0_config.Pi0Config(paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"),
+        # Here you define the dataset you are training on. In this example we use the Libero
+        # dataset. For your own dataset, you can change the repo_id to point to your dataset.
+        # Also modify the DataConfig to use the new config you made for your dataset above.
+        data=FrankaDataConfig(
+            repo_id="ty/pi0_erase_whiteboard_aligned",  # same as difined in data convert script
+            base_config=DataConfig(
+                # This flag determines whether we load the prompt (i.e. the task instruction) from the
+                # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
+                # a field called ``prompt`` in the input dict. The recommended setting is True.
+                prompt_from_task=True,
+            ),
+            extra_delta_transform=True,
+        ),
+        checkpoint_base_dir="/home/ty/openpi/checkpoints",
+        # Here you define which pre-trained checkpoint you want to load to initialize the model.
+        # This should match the model config you chose above -- i.e. in this case we use the pi0 base model.
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        # Below you can define other hyperparameters like the learning rate, number of training steps, etc.
+        # Check the base TrainConfig class for a full list of available hyperparameters.
+        num_train_steps=30_000,
+        batch_size=32,
+        freeze_filter=pi0_config.Pi0Config(
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"
+        ).get_freeze_filter(),
+        # Turn off EMA for LoRA finetuning.
+        ema_decay=None,
+    ),
+
+    TrainConfig(
+        # Change the name to reflect your model and dataset.
+        name="pi0_press_bottle_aligned_8d",
         # Here you define the model config -- In this example we use pi0 as the model
         # architecture and perform *full* finetuning. in the examples below we show how to modify
         # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.
@@ -758,7 +839,7 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="ty/pi0_pump_bottle_lora", # same as difined in data convert script
+            repo_id="ty/pi0_press_bottle_aligned_8d", # same as difined in data convert script
             
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
@@ -768,21 +849,63 @@ _CONFIGS = [
             ),
             extra_delta_transform=True,
         ),
-        checkpoint_base_dir="/home/ty/.cache/openpi/openpi-assets/checkpoints",
+        checkpoint_base_dir="/home/ty/openpi/checkpoints",
         # Here you define which pre-trained checkpoint you want to load to initialize the model.
         # This should match the model config you chose above -- i.e. in this case we use the pi0 base model.
-        weight_loader=weight_loaders.CheckpointWeightLoader("/home/ty/.cache/openpi/openpi-assets/checkpoints/pi0_base/params"),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
         # Below you can define other hyperparameters like the learning rate, number of training steps, etc.
         # Check the base TrainConfig class for a full list of available hyperparameters.
-        num_train_steps=20000,
+        num_train_steps=30000,
         num_workers=2,
-        batch_size=16,
+        batch_size=32,
         freeze_filter=pi0_config.Pi0Config(
             paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"
         ).get_freeze_filter(),
         # Turn off EMA for LoRA finetuning.
         ema_decay=None,
     ),
+
+
+        TrainConfig(
+        # This config is for fine-tuning pi05-base on a custom (smaller) DROID dataset.
+        # Here, we use LeRobot data format (like for all other fine-tuning examples)
+        # To convert your custom DROID dataset (<10s of hours) to LeRobot format, see examples/droid/convert_droid_data_to_lerobot.py
+        name="pi05_press_bottle",
+        # name="pi05_insert_USB",
+        # name="pi05_insert_plug".
+        #name="pi05_erase_whiteboard",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            # paligemma_variant="gemma_2b_lora",
+            # action_expert_variant="gemma_300m_lora",
+            action_dim=32,  # pi05 is trained with 32-dim actions
+            action_horizon=16,
+        ),
+        data=FrankaDataConfig(
+            # Replace with your custom DROID LeRobot dataset repo id.
+            repo_id="ty/pi0_pump_bottle_aligned",
+            base_config=DataConfig(prompt_from_task=True),
+            #assets=AssetsConfig(
+                # norm stats
+            #    assets_dir="/home/yansong/TacVLA/openpi/assets/pi0_press_bottle_aligned",
+                #assets_dir="/home/yansong/TacVLA/openpi/assets/pi0_erase_whiteboard_aligned",
+            #    asset_id="ty/pi0_erase_whiteboard_aligned",
+            #),
+        ),
+        checkpoint_base_dir="/home/ty/.cache/openpi/openpi-assets/checkpoints/pi05_press_bottle",
+        #weight_loader=weight_loaders.CheckpointWeightLoader("/home/ty/.cache/openpi/openpi-assets/checkpoints/pi05_base/params"),
+        num_train_steps=30_000,
+        batch_size=32,
+        # freeze_filter=pi0_config.Pi0Config(
+        #     pi05=True,
+        #     paligemma_variant="gemma_2b_lora",
+        #     action_expert_variant="gemma_300m_lora",
+        #     action_dim=32,
+        #     action_horizon=16,
+        # ).get_freeze_filter(),
+        # ema_decay=None,
+    ),
+
     #
     # Inference DROID configs.
     #

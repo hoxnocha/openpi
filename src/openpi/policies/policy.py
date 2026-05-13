@@ -21,6 +21,10 @@ from openpi.shared import nnx_utils
 BasePolicy: TypeAlias = _base_policy.BasePolicy
 
 
+def _shape(x: Any) -> Any:
+    return getattr(x, "shape", None)
+
+
 class Policy(BasePolicy):
     def __init__(
         self,
@@ -68,6 +72,7 @@ class Policy(BasePolicy):
     def infer(self, obs: dict, *, noise: np.ndarray | None = None) -> dict:  # type: ignore[misc]
         # Make a copy since transformations may modify the inputs in place.
         inputs = jax.tree.map(lambda x: x, obs)
+        print(f"[DEBUG] infer input observation/state shape: {_shape(inputs.get('observation/state'))}")
         #print(f"original inputs: {inputs}")
         img = inputs["observation/image"]
         #print(f"Key: 'observation/image'")
@@ -82,6 +87,9 @@ class Policy(BasePolicy):
         #print(f"  Dtype: {wrist_img.dtype}")
         
         inputs = self._input_transform(inputs)
+        print(f"[DEBUG] infer transformed state shape before batch: {_shape(inputs.get('state'))}")
+        if "actions" in inputs:
+            print(f"[DEBUG] infer transformed actions shape before batch: {_shape(inputs.get('actions'))}")
         #print("---inputs after transformation:----")
         #base_0_rgb = inputs["image"]["base_0_rgb"]
         #print(f"Key: 'image' -> 'base_0_rgb'")
@@ -114,10 +122,13 @@ class Policy(BasePolicy):
             sample_kwargs["noise"] = noise
 
         observation = _model.Observation.from_dict(inputs)
+        print(f"[DEBUG] model observation.state shape: {_shape(observation.state)}")
         start_time = time.monotonic()
+        sampled_actions = self._sample_actions(sample_rng_or_pytorch_device, observation, **sample_kwargs)
+        print(f"[DEBUG] model raw sampled actions shape: {_shape(sampled_actions)}")
         outputs = {
             "state": inputs["state"],
-            "actions": self._sample_actions(sample_rng_or_pytorch_device, observation, **sample_kwargs),
+            "actions": sampled_actions,
         }
         model_time = time.monotonic() - start_time
         if self._is_pytorch_model:
@@ -128,6 +139,7 @@ class Policy(BasePolicy):
         
         # ！！！！ very inportant
         outputs = self._output_transform(outputs)
+        print(f"[DEBUG] policy output actions shape after output transform: {_shape(outputs.get('actions'))}")
         #print(f"outputs after transformation", outputs)
         outputs["policy_timing"] = {
             "infer_ms": model_time * 1000,

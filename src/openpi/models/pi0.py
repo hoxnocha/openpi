@@ -320,6 +320,8 @@ class Pi0(_model.BaseModel):
         )
         v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
 
+        if actions.shape[-1]  != 8:
+            raise ValueError(f"Expected action dim >= 8 so action[7] is included in loss, got {actions.shape[-1]}.")
         return jnp.mean(jnp.square(v_t - u_t), axis=-1)
 
     @override

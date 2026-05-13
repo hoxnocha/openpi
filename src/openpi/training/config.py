@@ -693,7 +693,7 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="ty/pi0_erase_whiteboard_aligned_8d",  # same as difined in data convert script
+            repo_id="pi0_erase_whiteboard_aligned_8d",  # same as difined in data convert script
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
                 # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
@@ -731,7 +731,7 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="ty/pi0_insert_USB_aligned_8d",  # same as difined in data convert script
+            repo_id="pi0_insert_USB_aligned_8d",  # same as difined in data convert script
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
                 # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
@@ -768,7 +768,7 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="ty/pi0_insert_plug_aligned_8d",  # same as difined in data convert script
+            repo_id="pi0_insert_plug_aligned_8d",  # same as difined in data convert script
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
                 # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
@@ -804,7 +804,7 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="ty/pi0_erase_whiteboard_aligned",  # same as difined in data convert script
+            repo_id="pi0_erase_whiteboard_aligned",  # same as difined in data convert script
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
                 # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in

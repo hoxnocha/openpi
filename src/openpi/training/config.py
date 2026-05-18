@@ -373,6 +373,7 @@ class FrankaDataConfig(DataConfigFactory):
 
     extra_delta_transform: bool = True
     action_sequence_keys: Sequence[str] = ("action",)
+    state_dim: int = 7
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
@@ -406,7 +407,12 @@ class FrankaDataConfig(DataConfigFactory):
         # replace the transforms below with your own.
      
         data_transforms = _transforms.Group(
-            inputs=[franka_policy.frankaInputs(model_type=model_config.model_type)],
+            inputs=[
+                franka_policy.frankaInputs(
+                    model_type=model_config.model_type,
+                    state_dim=self.state_dim,
+                )
+            ],
             outputs=[franka_policy.frankaOutputs()],
         )
 
@@ -683,7 +689,7 @@ _CONFIGS = [
     #
     TrainConfig(
         # Change the name to reflect your model and dataset.
-        name="pi0_erase_whiteboard_aligned_8d",
+        name="pi0_press_bottle_aligned_7d",
         # Here you define the model config -- In this example we use pi0 as the model
         # architecture and perform *full* finetuning. in the examples below we show how to modify
         # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.
@@ -693,7 +699,46 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="pi0_erase_whiteboard_aligned_8d",  # same as difined in data convert script
+            repo_id="ty/pi0_press_bottle_aligned_7d",  # same as difined in data convert script
+            base_config=DataConfig(
+                # This flag determines whether we load the prompt (i.e. the task instruction) from the
+                # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
+                # a field called ``prompt`` in the input dict. The recommended setting is True.
+                prompt_from_task=True,
+            ),
+            # default_prompt="pump the bottle",
+            extra_delta_transform=True,
+        ),
+        checkpoint_base_dir="/home/ty/openpi/checkpoints",
+        # Here you define which pre-trained checkpoint you want to load to initialize the model.
+        # This should match the model config you chose above -- i.e. in this case we use the pi0 base model.
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        # Below you can define other hyperparameters like the learning rate, number of training steps, etc.
+        # Check the base TrainConfig class for a full list of available hyperparameters.
+        num_train_steps=30_000,
+        batch_size=32,
+        freeze_filter=pi0_config.Pi0Config(
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"
+        ).get_freeze_filter(),
+        # Turn off EMA for LoRA finetuning.
+        ema_decay=None,
+       
+    ),
+
+
+    TrainConfig(
+        # Change the name to reflect your model and dataset.
+        name="pi0_erase_whiteboard_aligned_7d",
+        # Here you define the model config -- In this example we use pi0 as the model
+        # architecture and perform *full* finetuning. in the examples below we show how to modify
+        # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.
+        # model=pi0_config.Pi0Config(paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"),# example for fine-tuning from official repo
+        model=pi0_config.Pi0Config(),
+        # Here you define the dataset you are training on. In this example we use the Libero
+        # dataset. For your own dataset, you can change the repo_id to point to your dataset.
+        # Also modify the DataConfig to use the new config you made for your dataset above.
+        data=FrankaDataConfig(
+            repo_id="ty/pi0_erase_whiteboard_aligned_7d",  # same as difined in data convert script
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
                 # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
@@ -721,7 +766,7 @@ _CONFIGS = [
 
         TrainConfig(
         # Change the name to reflect your model and dataset.
-        name="pi0_insert_USB_aligned_8d",
+        name="pi0_insert_USB_aligned_7d",
         # Here you define the model config -- In this example we use pi0 as the model
         # architecture and perform *full* finetuning. in the examples below we show how to modify
         # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.
@@ -731,7 +776,7 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="pi0_insert_USB_aligned_8d",  # same as difined in data convert script
+            repo_id="pi0_insert_USB_aligned_7d",  # same as difined in data convert script
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
                 # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
@@ -758,7 +803,7 @@ _CONFIGS = [
 
     TrainConfig(
         # Change the name to reflect your model and dataset.
-        name="pi0_insert_plug_aligned_8d",
+        name="pi0_insert_plug_aligned_7d",
         # Here you define the model config -- In this example we use pi0 as the model
         # architecture and perform *full* finetuning. in the examples below we show how to modify
         # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.
@@ -768,7 +813,7 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="pi0_insert_plug_aligned_8d",  # same as difined in data convert script
+            repo_id="pi0_insert_plug_aligned_7d",  # same as difined in data convert script
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
                 # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
@@ -794,7 +839,7 @@ _CONFIGS = [
 
     TrainConfig(
         # Change the name to reflect your model and dataset.
-        name="pi0_erase_whiteboard_aligned",
+        name="pi0_press_aligned",
         # Here you define the model config -- In this example we use pi0 as the model
         # architecture and perform *full* finetuning. in the examples below we show how to modify
         # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.

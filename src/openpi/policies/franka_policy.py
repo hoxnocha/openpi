@@ -10,7 +10,7 @@ from openpi.models import model as _model
 def make_franka_example() -> dict:
     """Creates a random input example for the franka policy."""
     return {
-        "observation/state": np.random.rand(7),
+        "observation/state": np.random.rand(8),
         "observation/image": np.random.randint(256, size=(224, 224, 3), dtype=np.uint8),
         "observation/wrist_image": np.random.randint(256, size=(224, 224, 3), dtype=np.uint8),
         "prompt": "do something",
@@ -38,7 +38,7 @@ class frankaInputs(transforms.DataTransformFn):
     # Determines which model will be used.
     # Do not change this for your own dataset.
     model_type: _model.ModelType
-    state_dim: int = 7
+    state_dim: int = 8
 
     def __call__(self, data: dict) -> dict:
         # Possibly need to parse images to uint8 (H,W,C) since LeRobot automatically

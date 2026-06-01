@@ -373,7 +373,7 @@ class FrankaDataConfig(DataConfigFactory):
 
     extra_delta_transform: bool = True
     action_sequence_keys: Sequence[str] = ("action",)
-    state_dim: int = 7
+    state_dim: int = 8
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
@@ -689,7 +689,7 @@ _CONFIGS = [
     #
     TrainConfig(
         # Change the name to reflect your model and dataset.
-        name="pi0_press_bottle_aligned_7d",
+        name="pi0_pump_bottle_aligned_61_finetune",
         # Here you define the model config -- In this example we use pi0 as the model
         # architecture and perform *full* finetuning. in the examples below we show how to modify
         # this to perform *low-memory* (LORA) finetuning and use pi0-FAST as an alternative architecture.
@@ -699,7 +699,7 @@ _CONFIGS = [
         # dataset. For your own dataset, you can change the repo_id to point to your dataset.
         # Also modify the DataConfig to use the new config you made for your dataset above.
         data=FrankaDataConfig(
-            repo_id="ty/pi0_press_bottle_aligned_8d",  # same as difined in data convert script
+            repo_id="ty/pi0_pump_bottle_aligned_61_finetune",  # same as difined in data convert script
             base_config=DataConfig(
                 # This flag determines whether we load the prompt (i.e. the task instruction) from the
                 # ``task`` field in the LeRobot dataset. If set to True, the prompt will show up in
